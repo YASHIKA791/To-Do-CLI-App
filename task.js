@@ -1,159 +1,199 @@
 const fs = require('fs');
 const command = process.argv[2];
 
-
-
-if(command === "add")
+switch(command)
 {
-    let List = [], addtask = process.argv[4], addpriority = process.argv[3]; 
-    if(addpriority==null || addtask==null)
-    {
+    case "add" : ADD(process.argv[4], process.argv[3]); break;
+    case "ls" : LS(); break;
+    case "del" : DEL(); break;
+    case "done" : DONE(); break;
+    case "report" : REPORT(); break;
+    default : HELP(); break;
+}
+
+
+function ADD(currtask, currpriority) 
+{
+    let List = [];
+    if(currpriority==null || currtask==null)
         console.log("Error: Missing tasks string. Nothing added!");
-    }
     else
     {
-    try {
-        List = JSON.parse(fs.readFileSync('PendingList.json'));
-    } catch(e) {
+        try {
+            List = JSON.parse(fs.readFileSync('task.json'));
+            fs.unlinkSync("task.json");
+        } catch(e) { }
 
+        let curritem = { task: currtask , priority: currpriority };
+
+        if(!List.includes(curritem))
+            List.push(curritem);
+
+        List.sort(function(a, b) {
+            return a.priority - b.priority;
+        })
+    
+        try {
+            fs.writeFileSync('task.json', JSON.stringify(List));
+        } catch(e) { }
+
+        console.log("Added task: \"" + currtask + "\" with priority " + currpriority);
     }
-       let item={task:addtask,priority:addpriority};
-    if(!List.includes(item))
-    List.push({task: addtask, priority: addpriority});
-    List.sort(function(a, b) {
-        return a.priority - b.priority;
-    })
-
-    try {
-        fs.writeFileSync('PendingList.json', JSON.stringify(List));
-    } catch(e) {
-
-    }
-
-    console.log("Added task: \"" + process.argv[4] + "\" with priority " + process.argv[3]);
 }
-}
-else if(command === "ls") 
+
+function LS() 
 {
-    let List = []; 
+    let List = [];
     try {
-        List = JSON.parse(fs.readFileSync('PendingList.json'));
+        List = JSON.parse(fs.readFileSync('task.json'));
     } catch(e) {
-
+ 
     }
-   let uniqueList=[... new Set(List)];
-    for(var i=0; i<uniqueList.length; i++) 
+    if(List.length==0)
     {
-        console.log((i+1) + ". " + uniqueList[i].task + " [" + uniqueList[i].priority + "]");
+        console.log("There are no pending tasks!");
+    } else {
+        const uniqueList = List.filter(function(value, index) {
+            const _value = JSON.stringify(value);
+            return index === List.findIndex(function(obj) {
+                return JSON.stringify(obj) === _value;
+            });
+        });
+        for(var i=0; i<uniqueList.length; i++)
+        {
+            console.log((i+1) + ". " + uniqueList[i].task + " [" + uniqueList[i].priority + "]");
+        }
     }
-} 
-else if(command === "del")
-{  if(process.argv[3]==null)
+}
+
+function DEL() 
+{
+    if(process.argv[3]==null)
     {
         console.log("Error: Missing NUMBER for deleting tasks.");
     }
     else
     {
-     let idx= process.argv[3] - 1;
-    let List = []; 
-    try {
-        List = JSON.parse(fs.readFileSync('PendingList.json'));
-    } catch(e){
+        let idx= process.argv[3] - 1;
+        let List = [];
 
-    }
-   
-    if(idx>=List.length || idx<0)
-    { idx=idx+1;
-      console.log("Error: task with index #"+idx+" does not exist. Nothing deleted.");
-    }
-    else{
-    
-    List.splice(idx, 1); 
+        try {
+            List = JSON.parse(fs.readFileSync('task.json'));
+        } catch(e){ }
 
-    try {
-        fs.writeFileSync('PendingList.json', JSON.stringify(List));
-    } catch(e) {
+        const uniqueList = List.filter(function(value, index) {
+            const _value = JSON.stringify(value);
+            return index === List.findIndex(function(obj) {
+                return JSON.stringify(obj) === _value;
+            });
+        });
 
-    }
-    idx=idx+1;
-    console.log("Deleted task #"+idx);
+        if(idx>=uniqueList.length || idx<0)
+        { 
+            idx=idx+1;
+            console.log("Error: task with index #"+idx+" does not exist. Nothing deleted.");
+        }
+        else 
+        {
+            uniqueList.splice(idx, 1);
+            try {
+                fs.writeFileSync('task.json', JSON.stringify(uniqueList));
+            } catch(e) { }
+            idx=idx+1;
+            console.log("Deleted task #"+idx);
+        }
+    }   
 }
-    }
-}
-else if(command === "done")
-{   if(process.argv[3]!=null)
-    {
-    let idx = process.argv[3] - 1;
-    let List = [];
-    let completedList = []; 
-    try {
-        List = JSON.parse(fs.readFileSync('PendingList.json'));
-        completedList = JSON.parse(fs.readFileSync('CompletedList.json'));
-    } catch(e) {
 
-    }
-    //Error: no incomplete item with index 5 exists.
-    if(idx>=List.length || idx<0)
-    {  idx=idx+1;
-        console.log("Error: no incomplete item with index #"+idx+" exists.");
-
-
-    }
-    else{
-    completedList.push(List[idx]); 
-    List.splice(idx, 1); 
-
-    completedList.sort(function(a, b) {
-        return a.priority - b.priority;
-    });
-
-    try {
-        fs.writeFileSync('PendingList.json', JSON.stringify(List));
-        fs.writeFileSync('CompletedList.json', JSON.stringify(completedList));
-    }
-     catch(e) {
-
-    }
-
-    console.log("Marked item as done.");
-}
-}
-else
+function DONE() 
 {
-    console.log(" Error: Missing NUMBER for marking tasks as done.");
-}
-}
-else if(command === "report") {
-    let List = []; 
-    try {
-        List = JSON.parse(fs.readFileSync('PendingList.json'));
-    } catch(e) {
-
-    }
-
-    console.log("Pending List : "+List.length);
-    for(var i=0; i<List.length; i++) 
+    if(process.argv[3]!=null)
     {
+        let idx = process.argv[3] - 1;
+        let List = [];
+        let completedList = [];
+        try {
+            List = JSON.parse(fs.readFileSync('task.json'));
+            completedList = JSON.parse(fs.readFileSync('completeTask.json'));
+        } catch(e) {
+    
+        }
+        const uniqueList = List.filter((value, index) => {
+            const _value = JSON.stringify(value);
+            return index === List.findIndex(obj => {
+            return JSON.stringify(obj) === _value;
+            });
+        });
+        const CompleteduniqueList = completedList.filter((value, index) => {
+            const _value = JSON.stringify(value);
+            return index === completedList.findIndex(obj => {
+            return JSON.stringify(obj) === _value;
+            });
+        });
+        
+        if(idx>=uniqueList.length || idx<0)
+        {  idx=idx+1;
+            console.log("Error: no incomplete item with index #"+idx+" exists.");
+    
+    
+        }
+        else{
+        CompleteduniqueList.push(List[idx]);
+        uniqueList.splice(idx, 1);
+    
+        CompleteduniqueList.sort(function(a, b) {
+            return a.priority - b.priority;
+        });
+    
+        try {
+            fs.writeFileSync('task.json', JSON.stringify(uniqueList));
+            fs.writeFileSync('completeTask.json', JSON.stringify(CompleteduniqueList));
+        }
+        catch(e) {
+    
+        }
+    
+        console.log("Marked item as done.");
+      }
+    }
+    else
+    {
+        console.log(" Error: Missing NUMBER for marking tasks as done.");
+    }
+}
+
+function REPORT()
+{
+    let List = [];
+    try {
+        List = JSON.parse(fs.readFileSync('task.json'));
+    } catch(e) { }
+ 
+    console.log("Pending : "+List.length);
+    for(var i=0; i<List.length; i++)
+    {  
+        if(i==List.length-1)
+        console.log((i+1) + ". " + List[i].task + " [" + List[i].priority + "]\n");
+        else
         console.log((i+1) + ". " + List[i].task + " [" + List[i].priority + "]");
     }
 
-    let completedList = []; 
+    let completedList = [];
     try {
-        completedList = JSON.parse(fs.readFileSync('CompletedList.json'));
+        completedList = JSON.parse(fs.readFileSync('completeTask.json'));
     }
      catch(e) {
-
+ 
     }
-
-    console.log(" ");
-
-    console.log("Completed List : "+completedList.length);
-    for(var i=0; i<completedList.length; i++) 
+ 
+    console.log("Completed : "+completedList.length);
+    for(var i=0; i<completedList.length; i++)
     {
-        console.log((i+1) + ". " + completedList[i].task + " [" + completedList[i].priority + "]");
+        console.log((i+1) + ". " + completedList[i].task );
     }
 }
-else
+
+function HELP() 
 {
     console.log("Usage :-");
     console.log("$ ./task add 2 hello world    # Add a new item with priority 2 and text " + '"hello world"' + " to the list");
@@ -162,5 +202,4 @@ else
     console.log("$ ./task done INDEX           # Mark the incomplete item with the given index as complete");
     console.log("$ ./task help                 # Show usage");
     console.log("$ ./task report               # Statistics");
-
-} 
+}
