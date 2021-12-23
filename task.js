@@ -15,15 +15,15 @@ if (command === "add") {
         } catch (e) {
 
         }
-        
+
         let item = { task: addtask, priority: addpriority };
         if (!List.includes(item))
             List.push({ task: addtask, priority: addpriority });
-            
+
         List.sort(function (a, b) {
             return a.priority - b.priority;
         })
-        
+
 
         try {
             fs.writeFileSync('PendingList.json', JSON.stringify(List));
@@ -172,7 +172,7 @@ else if (command === "report") {
     catch (e) {
 
     }
-    
+
     //console.log(" ");
 
     console.log("Completed : " + completedList.length);
