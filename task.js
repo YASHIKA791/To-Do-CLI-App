@@ -1,9 +1,7 @@
 const fs = require('fs');
 const command = process.argv[2];
 
-
-
-if (command === "add") {
+function add() {
     let List = [], addtask = process.argv[4], addpriority = process.argv[3];
     if (addpriority == null || addtask == null) {
         console.log("Error: Missing tasks string. Nothing added!");
@@ -34,7 +32,8 @@ if (command === "add") {
         console.log("Added task: \"" + process.argv[4] + "\" with priority " + process.argv[3]);
     }
 }
-else if (command === "ls") {
+
+function ls() {
     let List = [];
     try {
         List = JSON.parse(fs.readFileSync('PendingList.json'));
@@ -59,7 +58,8 @@ else if (command === "ls") {
         }
     }
 }
-else if (command === "del") {
+
+function del() {
     if (process.argv[3] == null) {
         console.log("Error: Missing NUMBER for deleting tasks.");
     }
@@ -95,7 +95,8 @@ else if (command === "del") {
         }
     }
 }
-else if (command === "done") {
+
+function done() {
     if (process.argv[3] != null) {
         let idx = process.argv[3] - 1;
         let List = [];
@@ -148,7 +149,8 @@ else if (command === "done") {
         console.log(" Error: Missing NUMBER for marking tasks as done.");
     }
 }
-else if (command === "report") {
+
+function report() {
     let List = [];
     try {
         List = JSON.parse(fs.readFileSync('PendingList.json'));
@@ -180,7 +182,8 @@ else if (command === "report") {
         console.log((i + 1) + ". " + completedList[i].task);
     }
 }
-else {
+
+function others() {
     console.log("Usage :-");
     console.log("$ ./task add 2 hello world    # Add a new item with priority 2 and text " + '"hello world"' + " to the list");
     console.log("$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order");
@@ -189,4 +192,15 @@ else {
     console.log("$ ./task help                 # Show usage");
     console.log("$ ./task report               # Statistics");
 
-} 
+}
+
+
+switch(command) 
+{
+    case "add" : add(); break; 
+    case "ls" : ls(); break;
+    case "del" : del(); break;
+    case "done" : done(); break; 
+    case "report" : report(); break; 
+    default : others();
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
- node task.js "$@"
+node task.js "$@"
 # # a=$3+" "+$4
 # # node task.js $1 $2 $a
 

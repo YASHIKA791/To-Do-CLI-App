@@ -19,8 +19,11 @@
    **On Linix:**
 
    ```
+   chmod 777 task.sh
    ./task.sh
    ```
+*chmod 777 task.sh is needed for granting permission to execute the task.sh file.*
+
 PendingList will have all those tasks that are yet to complete sorted in ascending order of priority while the CompletedList will contain the tasks,again sorted wrt priority  which have been completed.
 *Note: smaller number signify high priority*
 ## Usage
