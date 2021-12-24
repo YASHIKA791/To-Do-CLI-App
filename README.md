@@ -79,7 +79,8 @@ You can use the done command to mark an task as completed by its index.The speci
 $ ./task done 1
 Marked item as done.
 ```
-<img src="imgs/done.png">
+<img src="imgs/done.png"/>
+
 ### 5. Generate a report
 
 Show the number of complete and incomplete tasks in the list. and the complete and incomplete tasks grouped together.
@@ -95,7 +96,8 @@ Completed : 3
 2. another completed task
 3. yet another completed task
 ```
-<img src="imgs/report.png">
+<img src="imgs/report.png"/>
+
 ### 6. Delete a task
 
 You can use the del command to remove an task by its SL No from Pending List.
